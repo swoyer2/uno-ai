@@ -10,7 +10,6 @@ class Card:
     def set_color(self, color: Color) -> None:
         self.color = color
 
-    def playable(self, previous_card: "Card") -> bool:
     def playable(self, previous_card: "Card", draw_debt: bool) -> bool:
         """ 
         Returns if card is playable given the previous card and if there is a "draw_debt" meaning a +2 or +4
