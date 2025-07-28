@@ -7,3 +7,6 @@ class Color(Enum):
     RED = 3
     GREEN = 4
     WILD = 5
+
+    def __str__(self) -> str:
+        return self.name.capitalize()

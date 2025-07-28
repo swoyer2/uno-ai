@@ -20,3 +20,6 @@ class CardType(Enum):
     DRAW_TWO = 12
     WILD = 13
     WILD_DRAW_FOUR = 14
+
+    def __str__(self) -> str:
+        return self.name.capitalize()
