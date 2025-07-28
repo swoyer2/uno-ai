@@ -6,6 +6,11 @@ class Card:
         self.color = color
         self.card_type = card_type
     
+    def __str__(self) -> str:
+        if self.card_type == CardType.WILD or self.card_type == CardType.WILD_DRAW_FOUR:
+            return f"{str(self.card_type)}"
+        return f"{str(self.color)} {str(self.card_type)}"
+    
     # Used for wildcards
     def set_color(self, color: Color) -> None:
         self.color = color
