@@ -11,6 +11,20 @@ class Card:
         self.color = color
 
     def playable(self, previous_card: "Card") -> bool:
+    def playable(self, previous_card: "Card", draw_debt: bool) -> bool:
+        """ 
+        Returns if card is playable given the previous card and if there is a "draw_debt" meaning a +2 or +4
+        has been played previously and nobody has drawn the cards yet (due to stacking or being the next player)
+        """
+        if draw_debt:
+            # stacking draw 2s
+            if previous_card.card_type == CardType.DRAW_TWO and self.card_type != CardType.DRAW_TWO:
+                return False
+            
+            # stacking draw 4s
+            if previous_card.card_type == CardType.WILD_DRAW_FOUR and self.card_type != CardType.WILD_DRAW_FOUR:
+                return False
+
         if self.color == previous_card.color:
             return True
         if self.card_type == previous_card.card_type:
