@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "uno-pygame"
+version = "0.1.0"
+description = "A simple uno game ui using my uno package and gamepigeon"
+requires-python = ">=3.6"
+dependencies = [
+    "uno">=0.1.0",
+    "pygame",
+]
