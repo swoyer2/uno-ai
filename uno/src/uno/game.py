@@ -1,9 +1,9 @@
-from player import Player
-from deck import Deck
-from card import Card
+from .player import Player
+from .deck import Deck
+from .card import Card
 
-from enums.card_type import CardType
-from enums.color import Color
+from .enums.card_type import CardType
+from .enums.color import Color
 
 class Game:
     def __init__(self, player_count: int = 6) -> None:

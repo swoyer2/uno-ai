@@ -1,5 +1,5 @@
-from enums.color import Color
-from enums.card_type import CardType
+from .enums.color import Color
+from .enums.card_type import CardType
 
 class Card:
     def __init__(self, color: Color, card_type: CardType) -> None:

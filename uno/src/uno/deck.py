@@ -2,9 +2,9 @@ import yaml
 from pathlib import Path
 import random
 
-from card import Card
-from enums.color import Color
-from enums.card_type import CardType
+from .card import Card
+from .enums.color import Color
+from .enums.card_type import CardType
 
 class Deck:
     def __init__(self) -> None:
@@ -13,7 +13,7 @@ class Deck:
         self.__init_deck()
     
     def __init_deck(self) -> None:
-        config_path = Path(__file__).parent.parent / "config" / "config.yaml"
+        config_path = Path(__file__).parent / "config" / "config.yaml"
 
         with config_path.open("r") as f:
             config = yaml.safe_load(f)
