@@ -128,3 +128,7 @@ class Game:
         for i in range(NUM_CARDS_TO_DEAL * len(self.players)):
             self.players[current_player_to_deal].recieve_cards(self.deck.draw())
             current_player_to_deal = (current_player_to_deal + 1) % len(self.players)
+    
+    def get_cards(self, player: Player) -> list[Card]:
+        """ Get cards in hand for a specified player"""
+        return player.cards
