@@ -13,7 +13,7 @@ class Deck:
         self.__init_deck()
     
     def __init_deck(self) -> None:
-        config_path = Path("config/config.yaml")
+        config_path = Path(__file__).parent.parent / "config" / "config.yaml"
 
         with config_path.open("r") as f:
             config = yaml.safe_load(f)
