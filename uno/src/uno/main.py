@@ -2,6 +2,7 @@ from .game import Game
 
 def main():
     uno_game = Game()
+    uno_game.setup_game()
     while not uno_game.is_game_over():
         current_player = uno_game.players[uno_game.whos_turn]
         avaiable_cards = uno_game.get_playable_cards(current_player)

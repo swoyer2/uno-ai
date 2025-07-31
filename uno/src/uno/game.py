@@ -14,9 +14,6 @@ class Game:
         self.clockwise_turn: bool = True # Normally goes clockwise for turns, unless reverse card then it flips
         self.draw_debt: int = 0 # The number of cards to draw for 
 
-        # Starting game
-        self.deck.shuffle()
-        self.deal_cards()
 
     def __repr__(self) -> str:
         return "\n ".join(f"Player {i}: [{hand}]" for i, hand in enumerate(self.players))
@@ -36,6 +33,11 @@ class Game:
                 self.deck.shuffle()
 
         return cards_to_draw
+    
+    def setup_game(self) -> None:
+        # Starting game
+        self.deck.shuffle()
+        self.deal_cards()
 
     def play(self, played_card: Card | None) -> None:
         """

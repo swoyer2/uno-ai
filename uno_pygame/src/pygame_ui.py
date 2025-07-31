@@ -3,15 +3,15 @@ import pygame  # pygame-ce
 from pathlib import Path
 from typing import TYPE_CHECKING, TypedDict, Optional
 
-from pygame_things.card import CardSprite
-from pygame_things.hand import Hand
+from .card import CardSprite
+from .hand import Hand
 from uno import Game
 
 if TYPE_CHECKING:
     # Ensure uno/__init__.py exports Card; otherwise: from uno.card import Card
     from uno import Card
 
-ASSETS_ROOT = Path("uno-pygame/assets")
+ASSETS_ROOT = Path("uno_pygame/assets")
 CARD_SCALE = 0.8          # card scaling for hands and last-played card
 DECK_SCALE = CARD_SCALE   # deck image scale; keep in sync with cards for visual parity
 
