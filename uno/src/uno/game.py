@@ -6,7 +6,7 @@ from .enums.card_type import CardType
 from .enums.color import Color
 
 class Game:
-    def __init__(self, player_count: int = 6) -> None:
+    def __init__(self, player_count: int = 4) -> None:
         self.deck: Deck = Deck()
         self.players: list[Player] = [Player() for i in range(player_count)]
         self.played_cards: list[Card] = []
