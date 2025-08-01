@@ -148,6 +148,9 @@ class UnoObserverUI:
         # Hands
         self.hands: tuple[Hand, ...] = tuple()
 
+        self.moves: list[int | None] = []
+        self.move_index: int = 0
+
     # --- setup & rebuild ---
 
     def init_display(self) -> None:
@@ -253,6 +256,25 @@ class UnoObserverUI:
         # Recreate display with the new flags and rebuild everything
         self.init_display()
 
+    def replay_to(self, index: int) -> None:
+        if index > len(self.moves):
+            return # all moves used
+
+        move = self.moves[index]
+        player = self.game.players[self.game.whos_turn]
+
+        card_to_play = player.cards[move] if move is not None else None
+
+        if card_to_play is None:
+            self.game.play(None)  # Draw
+        else:
+            self.game.play(card_to_play, replay=True)
+
+        self.move_index = index + 1
+
+        self.refresh_hands()
+        self.refresh_last_played()
+
     # --- draw & loop ---
 
     def draw(self) -> None:
@@ -290,6 +312,9 @@ class UnoObserverUI:
                             running = False
                         elif event.key == pygame.K_F11:
                             self.toggle_fullscreen()
+                        elif event.key == pygame.K_RIGHT:
+                            if self.move_index < len(self.moves):
+                                self.replay_to(self.move_index)
                     elif event.type == pygame.VIDEORESIZE:
                         self.handle_resize(event.size)
 

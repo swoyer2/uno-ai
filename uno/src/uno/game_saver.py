@@ -14,23 +14,23 @@ class GameSaver:
 
     def export(self) -> None:
         """
-        YAML export:
-        - deck as a list of stringified cards
-        - moves as a list of ints/None
+        Export to YAML:
+        - deck is only written if file doesn't exist
+        - moves are always updated
         """
         payload = {
-            "deck": [str(card) for card in self.deck.cards],
-            "moves": self.move_list,
+            "moves": self.move_list
         }
+
+        if self.save_path.exists():
+            # Load existing file and preserve its deck
+            with open(self.save_path, "r", encoding="utf-8") as f:
+                existing = yaml.safe_load(f) or {}
+            payload["deck"] = existing.get("deck", [str(card) for card in self.deck.cards])
+        else:
+            # First time: write full payload
+            payload["deck"] = [str(card) for card in self.deck.cards]
+
         self.save_path.parent.mkdir(parents=True, exist_ok=True)
         with open(self.save_path, "w", encoding="utf-8") as f:
             yaml.safe_dump(payload, f, sort_keys=False, allow_unicode=True)
-    
-    @staticmethod
-    def load(path: Path) -> dict:
-        """Load deck + moves back from YAML as a dict."""
-        with open(path, "r", encoding="utf-8") as f:
-            data = yaml.safe_load(f)
-
-        # data will look like: {"deck": ["Card(...)"], "moves": [None, 2, 4]}
-        return data

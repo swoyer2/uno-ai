@@ -14,9 +14,15 @@ class Game:
         self.clockwise_turn: bool = True # Normally goes clockwise for turns, unless reverse card then it flips
         self.draw_debt: int = 0 # The number of cards to draw for 
 
-
     def __repr__(self) -> str:
         return "\n ".join(f"Player {i}: [{hand}]" for i, hand in enumerate(self.players))
+    
+    def start_game(self, shuffle=True) -> None:
+        if shuffle:
+            self.deck.shuffle()
+        
+        self.deal_cards()
+        self.played_cards.append(self.deck.cards.pop(-1)) # Plays the first card off the top of the deck
     
     def __smart_draw(self, amount_to_draw: int = 1) -> list[Card]:
         """
@@ -30,16 +36,11 @@ class Game:
             else: # Remake deck
                 self.deck.cards = self.played_cards
                 self.played_cards = []
-                self.deck.shuffle()
+                self.deck.shuffle() # TODO Add this somehow so the save file knows the deck was shuffled and what it became
 
         return cards_to_draw
-    
-    def setup_game(self) -> None:
-        # Starting game
-        self.deck.shuffle()
-        self.deal_cards()
 
-    def play(self, played_card: Card | None) -> None:
+    def play(self, played_card: Card | None, replay: bool = False) -> None:
         """
         Handles the current player's action of playing a card or drawing from the deck.
 
@@ -48,6 +49,7 @@ class Game:
 
         Args:
             played_card (Card | None): The card being played, or None if the player is drawing.
+            replay (bool): If this is a replay then it will skip getting input (for cards like wild)
         """
         current_player: Player = self.players[self.whos_turn]
 
@@ -70,10 +72,12 @@ class Game:
                 self.__reverse()
 
             elif played_card.card_type == CardType.WILD:
-                played_card.color = self.__get_color_input()
+                if not replay:
+                    played_card.color = self.__get_color_input()
             
             elif played_card.card_type == CardType.WILD_DRAW_FOUR:
-                played_card.color = self.__get_color_input()
+                if not replay:
+                    played_card.color = self.__get_color_input()
                 self.draw_debt += 4
             
             elif played_card.card_type == CardType.DRAW_TWO:
