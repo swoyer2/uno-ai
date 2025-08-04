@@ -1,3 +1,3 @@
-from .src.uno import Game, Card, Color, CardType, GameSaver
+from .src.uno import Game, Card, Color, CardType, GameSaver, Player
 
-__all__ = ["Game", "Card", "Color", "CardType", "GameSaver"]
+__all__ = ["Game", "Player", "Card", "Color", "CardType", "GameSaver"]

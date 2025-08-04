@@ -13,6 +13,7 @@ class Game:
         self.whos_turn: int = 0
         self.clockwise_turn: bool = True # Normally goes clockwise for turns, unless reverse card then it flips
         self.draw_debt: int = 0 # The number of cards to draw for 
+        self.history: dict[int, list[Card]] = {0: [], 1: [], 2: [], 3: []}
 
     def __repr__(self) -> str:
         return "\n ".join(f"Player {i}: [{hand}]" for i, hand in enumerate(self.players))
@@ -40,7 +41,7 @@ class Game:
 
         return cards_to_draw
 
-    def play(self, played_card: Card | None, replay: bool = False) -> None:
+    def play(self, played_card: Card | None, replay: bool = False, color_input: Color | None = None) -> None:
         """
         Handles the current player's action of playing a card or drawing from the deck.
 
@@ -63,6 +64,7 @@ class Game:
 
         else:
             self.played_cards.append(played_card)
+            self.history[self.whos_turn].append(played_card)
             current_player.remove_card(played_card)
 
             if played_card.card_type == CardType.SKIP:
@@ -73,11 +75,17 @@ class Game:
 
             elif played_card.card_type == CardType.WILD:
                 if not replay:
-                    played_card.color = self.__get_color_input()
+                    if color_input:
+                        played_card.color = color_input
+                    else:
+                        played_card.color = self.__get_color_input()
             
             elif played_card.card_type == CardType.WILD_DRAW_FOUR:
                 if not replay:
-                    played_card.color = self.__get_color_input()
+                    if color_input:
+                        played_card.color = color_input
+                    else:
+                        played_card.color = self.__get_color_input()
                 self.draw_debt += 4
             
             elif played_card.card_type == CardType.DRAW_TWO:
@@ -138,3 +146,9 @@ class Game:
     def get_cards(self, player: Player) -> list[Card]:
         """ Get cards in hand for a specified player"""
         return player.cards
+    
+    def get_winner(self) -> int:
+        """ Gives index of winning player """
+        for i, player in enumerate(self.players):
+            if len(player.cards) == 0:
+                return i
