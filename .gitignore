@@ -1,2 +1,6 @@
 *.pyc
 build
+saved_games
+*.db
+*.db-shm
+*.db-wal

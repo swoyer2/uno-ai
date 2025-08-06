@@ -4,7 +4,7 @@ from pathlib import Path
 import random
 
 class UnoAgent(nn.Module):
-    def __init__(self, input_size=1347, hidden_size=64, output_size=61):
+    def __init__(self, agent_id: str, parent_id: str | None, input_size=1347, hidden_size=64, output_size=61):
         super().__init__()
         self.net = nn.Sequential(
             nn.Linear(input_size, hidden_size),
@@ -13,6 +13,10 @@ class UnoAgent(nn.Module):
         )
         self.first_name = None
         self.last_name = None
+        self.agent_id = agent_id
+        self.parent_id = parent_id
+        self.games_played = 0
+        self.wins = 0
 
     def forward(self, x):
         return self.net(x)
@@ -55,3 +59,16 @@ class UnoAgent(nn.Module):
             with open(last_names_file, "r", encoding="utf-8") as f:
                 last_names = [line.strip() for line in f if line.strip()]
             self.last_name = random.choice(last_names)
+    
+    def metadata(self) -> dict:
+        return {
+            "agent_id": self.agent_id,
+            "parent_id": self.parent_id,
+            "first_name": self.first_name,
+            "last_name": self.last_name,
+            "num_wins": self.wins,
+            "num_games": self.games_played,
+        }
+
+    def serialize_weights(self) -> dict:
+        return {k: v.tolist() for k, v in self.state_dict().items()}

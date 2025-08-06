@@ -1,6 +1,8 @@
 from uno import Game, GameSaver, Player, Color
 from agent import UnoAgent
 from input_encoding import build_state_tensor, CARD_TO_INDEX, INDEX_TO_CARD
+from db_utils import init_db, save_game_result, save_agent_score, save_agent_snapshot
+import uuid  # For generating unique agent IDs
 
 import time
 from pathlib import Path
@@ -131,7 +133,7 @@ def play_game(agents: List[UnoAgent], game_id: int, round_num: int, save_game: b
 
     game_length = 0
 
-    while not uno_game.is_game_over() and game_length < 1000:
+    while not uno_game.is_game_over() and game_length < 500:
         current_player = uno_game.players[uno_game.whos_turn]
         agent = agents[uno_game.whos_turn]
 
@@ -152,16 +154,20 @@ def play_game(agents: List[UnoAgent], game_id: int, round_num: int, save_game: b
     if game_saver:
         game_saver.export()
 
-    return uno_game.get_winner() if game_length < 1000 else -1
+    return uno_game.get_winner() if game_length < 500 else -1
 
 def evolve_agents():
-    agents = [UnoAgent() for _ in range(NUM_AGENTS)]
+    init_db()  # Ensure tables exist
+
+    agents = [UnoAgent(agent_id=str(uuid.uuid4()), parent_id=None) for _ in range(NUM_AGENTS)]
+    for agent in agents:
+        agent.create_name(parent_last_name=None)
     scores = [0] * NUM_AGENTS
     games_per_agent = (GAMES_PER_ROUND * AGENTS_PER_GAME) // NUM_AGENTS
     assert GAMES_PER_ROUND % (NUM_AGENTS // AGENTS_PER_GAME) == 0, "GAMES_PER_ROUND must be divisible by (NUM_AGENTS / AGENTS_PER_GAME)"
 
     games_per_round = NUM_AGENTS // AGENTS_PER_GAME
-    rounds_needed = GAMES_PER_ROUND // games_per_round  # e.g., 1000 / 25 = 40
+    rounds_needed = GAMES_PER_ROUND // games_per_round
 
     for round_num in range(ROUNDS):
         print(f"\n=== Round {round_num + 1} ===")
@@ -178,12 +184,24 @@ def evolve_agents():
 
         for game_id, agent_indices in enumerate(tqdm(full_schedule, desc=f"Round {round_num + 1}", unit="game")):
             game_agents = [agents[i] for i in agent_indices]
-            save_game = game_id < 10
+            for agent in game_agents:
+                agent.games_played += 1
+            save_game = game_id < 1
             winner_idx = play_game(game_agents, game_id, round_num, save_game)
 
             if winner_idx != -1:
                 global_winner_idx = agent_indices[winner_idx]
+                winner_agent = agents[global_winner_idx]
                 scores[global_winner_idx] += 1
+                winner_agent.wins += 1
+
+                # Save to DB
+                save_game_result(round_num, game_id, winner_agent.agent_id)
+
+        # Log scores and snapshots
+        for agent, score in zip(agents, scores):
+            save_agent_score(agent.agent_id, round_num, score)
+            save_agent_snapshot(agent.agent_id, round_num, agent.serialize_weights(), agent.metadata())
 
         # Selection
         agent_score_pairs = list(zip(agents, scores))
@@ -202,16 +220,16 @@ def evolve_agents():
         new_agents = survivors[:]
         while len(new_agents) < NUM_AGENTS:
             parent = random.choice(survivors)
-            child = UnoAgent()
+            child = UnoAgent(agent_id=str(uuid.uuid4()), parent_id=parent.agent_id)
             child.load_state_dict(parent.state_dict())
             child.mutate(mutation_rate=0.1)
+            child.create_name(parent_last_name=parent.last_name)
             new_agents.append(child)
 
         agents = new_agents
         scores = [0] * NUM_AGENTS
 
     return agents
-
 
 if __name__ == "__main__":
     SAVE_DIR.mkdir(parents=True, exist_ok=True)
