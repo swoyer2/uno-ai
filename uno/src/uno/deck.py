@@ -7,8 +7,10 @@ from .enums.color import Color
 from .enums.card_type import CardType
 
 class Deck:
-    def __init__(self) -> None:
+    """ Size is a positive in multiplier where 1 = normal deck, 2 = 2x size deck, etc. """
+    def __init__(self, size=1) -> None:
         self.cards: list[Card] = []
+        self.size = size
         
         self.__init_deck()
     
@@ -20,9 +22,10 @@ class Deck:
         
         for color in config["CARDS"]:
             for card_type in config["CARDS"][color]:
-                card_to_add = Card(Color[color], CardType[card_type])
-                amount_to_add = config["CARDS"][color][card_type]
-                self.add_cards(card_to_add, amount_to_add)
+                for i in range(self.size):
+                    card_to_add = Card(Color[color], CardType[card_type])
+                    amount_to_add = config["CARDS"][color][card_type]
+                    self.add_cards(card_to_add, amount_to_add)
     
     def add_cards(self, card: Card, amount_to_add: int) -> None:
         for i in range(amount_to_add):

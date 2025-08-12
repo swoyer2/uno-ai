@@ -34,3 +34,4 @@ class GameSaver:
         self.save_path.parent.mkdir(parents=True, exist_ok=True)
         with open(self.save_path, "w", encoding="utf-8") as f:
             yaml.safe_dump(payload, f, sort_keys=False, allow_unicode=True)
+    

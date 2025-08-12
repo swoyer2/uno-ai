@@ -117,7 +117,7 @@ ROUNDS = 500
 TOP_K = 25
 SAVE_DIR = Path("saved_games")
 
-def play_game(agents: List[UnoAgent], game_id: int, round_num: int, save_game: bool = False) -> int:
+def play_game(agents: List[UnoAgent], game_id: int, round_num: int, save_game: bool = False) -> int | None:
     uno_game = Game()
     uno_game.deck.shuffle()
 
@@ -127,13 +127,13 @@ def play_game(agents: List[UnoAgent], game_id: int, round_num: int, save_game: b
         save_path = SAVE_DIR / f"round_{round_num}_game_{game_id}_{timestamp}.yaml"
         game_saver = GameSaver(uno_game, save_path)
         game_saver.export()
-
+        
     uno_game.deal_cards()
-    uno_game.played_cards.append(uno_game.deck.cards.pop(-1))
+    uno_game.played_cards.append(uno_game.deck.cards.pop())
 
     game_length = 0
 
-    while not uno_game.is_game_over() and game_length < 500:
+    while not uno_game.is_game_over():
         current_player = uno_game.players[uno_game.whos_turn]
         agent = agents[uno_game.whos_turn]
 
@@ -153,8 +153,8 @@ def play_game(agents: List[UnoAgent], game_id: int, round_num: int, save_game: b
     
     if game_saver:
         game_saver.export()
-
-    return uno_game.get_winner() if game_length < 500 else -1
+    
+    return uno_game.get_winner()
 
 def evolve_agents():
     init_db()  # Ensure tables exist
@@ -188,8 +188,8 @@ def evolve_agents():
                 agent.games_played += 1
             save_game = game_id < 1
             winner_idx = play_game(game_agents, game_id, round_num, save_game)
-
-            if winner_idx != -1:
+            
+            if winner_idx != None:
                 global_winner_idx = agent_indices[winner_idx]
                 winner_agent = agents[global_winner_idx]
                 scores[global_winner_idx] += 1
@@ -197,6 +197,8 @@ def evolve_agents():
 
                 # Save to DB
                 save_game_result(round_num, game_id, winner_agent.agent_id)
+            else:
+                save_game_result(round_num, game_id, "None")
 
         # Log scores and snapshots
         for agent, score in zip(agents, scores):

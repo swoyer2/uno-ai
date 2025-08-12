@@ -7,7 +7,7 @@ from .enums.color import Color
 
 class Game:
     def __init__(self, player_count: int = 4) -> None:
-        self.deck: Deck = Deck()
+        self.deck: Deck = Deck(size=5)
         self.players: list[Player] = [Player() for i in range(player_count)]
         self.played_cards: list[Card] = []
         self.whos_turn: int = 0
@@ -15,9 +15,11 @@ class Game:
         self.draw_debt: int = 0 # The number of cards to draw for 
         self.history: dict[int, list[Card]] = {0: [], 1: [], 2: [], 3: []}
 
+        self.append_new_deck_call = None
+
     def __repr__(self) -> str:
         return "\n ".join(f"Player {i}: [{hand}]" for i, hand in enumerate(self.players))
-    
+
     def start_game(self, shuffle=True) -> None:
         if shuffle:
             self.deck.shuffle()
@@ -31,13 +33,9 @@ class Game:
         continues to draw cards until amount_to_draw = len(cards_to_draw)
         """
         cards_to_draw: list[Card] = []
-        while len(cards_to_draw) != amount_to_draw:
+        while len(cards_to_draw) != amount_to_draw and self.deck.cards:
             if self.deck.cards:
                 cards_to_draw.append(*self.deck.draw())
-            else: # Remake deck
-                self.deck.cards = self.played_cards
-                self.played_cards = []
-                self.deck.shuffle() # TODO Add this somehow so the save file knows the deck was shuffled and what it became
 
         return cards_to_draw
 
@@ -131,6 +129,8 @@ class Game:
         self.clockwise_turn = not self.clockwise_turn
     
     def is_game_over(self) -> bool:
+        if not self.deck.cards:
+            return True
         for player in self.players:
             if len(player.cards) == 0:
                 return True
@@ -147,8 +147,12 @@ class Game:
         """ Get cards in hand for a specified player"""
         return player.cards
     
-    def get_winner(self) -> int:
+    def get_winner(self) -> int | None:
         """ Gives index of winning player """
-        for i, player in enumerate(self.players):
-            if len(player.cards) == 0:
-                return i
+        if self.is_game_over():
+            for i, player in enumerate(self.players):
+                if len(player.cards) == 0:
+                    return i
+            return -1
+        return None
+        
